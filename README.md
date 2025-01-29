@@ -16,11 +16,16 @@ You will also need library from spinnaker, download the file : https://www.teled
 To import correctly the project and libraries, follow instruction from the pdf Travail JB janvier 2025
 
 Here is the code :
-C_chill = Code in C++, connect to camera, analyse image, displays image, save resutls as heading frame rate in csv file
-camera_acquisition = Creation of a DLL from C++ C_chill, connect to camera, analyse image, displays image, save resutls as heading frame rate in csv file, send this results via callback
-Camera_unity_C_sharp = Proposition of interface between DLL and C#
-Acquisitiond_v143 = Executable from the C++ C_chill
-3 DLL libraries camera_acquisition_ = use the standard one for normal use. You can also find debug and print and no image DLL.
+## C_chill
+Code in C++, connect to camera, analyse image, displays image, save resutls as heading frame rate in csv file
+## camera_acquisition
+Creation of a DLL from C++ C_chill, connect to camera, analyse image, displays image, save resutls as heading frame rate in csv file, send this results via callback
+## Camera_unity_C_sharp
+Proposition of interface between DLL and C#
+## Acquisitiond_v143
+Executable from the C++ C_chill
+## 3 DLL libraries camera_acquisition_
+use the standard one for normal use. You can also find debug and print and no image DLL.
 
 
 
