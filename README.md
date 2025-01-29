@@ -7,8 +7,8 @@ which display a 3D world created from the Unity game engine.
 The fly is fixed on a sapphire, it can turns on itself and flap its wings. A camera takes pictures of the fly, detects its direction, wings. Unity recovers the camera data and integrates it to the behaviour rig.
 
 ## Prerequisites
-- OpenCV 4.10.0 - [https://opencv.org/releases/](opencv.org/releases)
-- Spinnaker SDK - [https://www.teledynevisionsolutions.com/products/spinnaker-sdk/?model=Spinnaker%20SDK&vertical=machine%20vision&segment=iis](teledynevisionsolutions.com/products/spinnaker-sdk/)
+- OpenCV 4.10.0 - [opencv.org/releases](https://opencv.org/releases/)
+- Spinnaker SDK - [teledynevisionsolutions.com/products/spinnaker-sdk/](https://www.teledynevisionsolutions.com/products/spinnaker-sdk/?model=Spinnaker%20SDK&vertical=machine%20vision&segment=iis)
 
 To import correctly the project and libraries, follow instruction from the pdf 'Travail JB janvier 2025'
 
