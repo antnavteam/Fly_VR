@@ -27,6 +27,8 @@
 #include <fstream>
 #include <cmath>
 #include <chrono>
+#include <atomic>
+#include <conio.h>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -58,7 +60,15 @@ using namespace cv;
 
 
 
-
+bool getInput(char* c)
+{
+    if (_kbhit())
+    {
+        *c = _getch();
+        return true; // Key Was Hit
+    }
+    return false; // No keys were pressed
+}
 
 bool SetAcquisitionMode(INodeMap& nodeMap)
 {
@@ -341,8 +351,8 @@ void DrawReperAxisAndCalculateAngle(Mat& contourImage, const RotatedRect& ellips
 
     // Déterminer quel demi-ellipse a les points de contour les plus proches du centre   
 #ifdef VERBOSE
-    cout << "averageDistance_1  =  " <<  averageDistance_1 << endl;
-    cout << "averageDistance_2  =  " << averageDistance_2 <<  endl;
+    //cout << "averageDistance_1  =  " <<  averageDistance_1 << endl;
+    //cout << "averageDistance_2  =  " << averageDistance_2 <<  endl;
 #endif // VERBOSE
 
     if (averageDistance_1 < averageDistance_2) {
@@ -476,27 +486,27 @@ Mat CombineImages(const Mat& img1, const Mat& img2) {
 }
 
 std::ofstream CreateCSVFile() {
-    // Obtenez la date et l'heure actuelles
+    //  la date et l'heure actuelles
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
 
-    // Formatez la date et l'heure dans une chaîne de caractères
+    //  la date et l'heure dans une chaîne de caractères
     std::ostringstream oss;
     oss << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S");
     std::string timestamp = oss.str();
 
-    // Créez le nom du fichier avec la date et l'heure
+    //  le nom du fichier avec la date et l'heure
     std::string filename = "data_" + timestamp + ".csv";
 
-    // Ouvrez le fichier CSV en mode écriture
+    //  le fichier CSV en mode écriture
     std::ofstream csvFile(filename);
     if (!csvFile.is_open()) {
         std::cerr << "Error opening CSV file." << std::endl;
         throw std::runtime_error("Failed to create CSV file");
     }
 
-    // Écrivez les en-têtes de colonne
-    csvFile << "iteration, datetime, FrameRate,HeadingAngle\n";
+    //  les en-têtes de colonne
+    csvFile << "iteration, datetime, FrameRate, HeadingAngle, Spacebar_pressed\n";
 
     return csvFile;
 }
@@ -518,6 +528,7 @@ int AcquireImages(CameraPtr pCam, INodeMap & nodeMap, INodeMap & nodeMapTLDevice
     int alert_inversion = ALERT_INVERSION;
     double frame_rate = 0;
     auto start = std::chrono::high_resolution_clock::now();
+	bool keyPressed = false;
 
 	// Open csv file in wrtting mode  
     std::ofstream csvFile;
@@ -534,19 +545,12 @@ int AcquireImages(CameraPtr pCam, INodeMap & nodeMap, INodeMap & nodeMapTLDevice
         return -1;
     }
 
-
     // ***  Start big loop  *** //
     try
     {
 
         // ***  Begin acquiring images  *** //
         pCam->BeginAcquisition();
-#ifdef VERBOSE
-        cout << "Acquiring images..." << endl;
-#endif // VERBOSE
-
-
-
 
 		// ***  Retrieve device serial number for filename if save mode  *** //
         gcstring deviceSerialNumber;
@@ -557,7 +561,6 @@ int AcquireImages(CameraPtr pCam, INodeMap & nodeMap, INodeMap & nodeMapTLDevice
             // ***  Create Folder for image  *** //
             CreateFolder(folderPath);
         }
-
 
 
 
@@ -737,9 +740,28 @@ int AcquireImages(CameraPtr pCam, INodeMap & nodeMap, INodeMap & nodeMapTLDevice
                         waitKey(0);
                     }
 #ifdef VERBOSE                 
-                    cout << "Fequence =  " << frame_rate << endl;
-                    cout << "Heading  =  " << headingAngle << endl;
+                    //cout << "Fequence =  " << frame_rate << endl;
+                    //cout << "Heading  =  " << headingAngle << endl;
+                    if (first_passage == 0) {
+                        cout << endl;
+                        cout << endl;
+                        cout << endl;
+                        cout << "Start acquisition..." << endl;
+                    }
 #endif // VERBOSE
+
+					// ** KEYBOARD INPUT STEP ** //
+                    char key = ' ';
+                    if (getInput(&key)) {
+							keyPressed = true;
+#ifdef VERBOSE
+                            cout << "Key has been pressed ! " << endl;
+#endif // VERBOSE
+                            if (key == 'q') {
+                                cout << "q has been pressed ! " << endl;
+                                return -1;
+                            }
+						}
 
 
                     // ** CSV WRITING STEP ** //
@@ -750,7 +772,7 @@ int AcquireImages(CameraPtr pCam, INodeMap & nodeMap, INodeMap & nodeMapTLDevice
                         oss << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S");
                         return oss.str();
                         }();
-                    csvFile << iteration << "," << timestamp << "," << frame_rate << "," << headingAngle << "\n";
+                    csvFile << iteration << "," << timestamp << "," << frame_rate << "," << headingAngle << "," << keyPressed << "\n";
 
                     // ** SAVING STEP ** //
                     if (SAVE_IMAGE == "TRUE") {
@@ -766,8 +788,9 @@ int AcquireImages(CameraPtr pCam, INodeMap & nodeMap, INodeMap & nodeMapTLDevice
                 pResultImage = nullptr;
                 first_passage = 1;
 				iteration++;
+                keyPressed = false;
 
-                cout << endl;
+                //cout << endl;
             }
             catch (Spinnaker::Exception &e)
             {

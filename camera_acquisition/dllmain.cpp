@@ -11,7 +11,8 @@
 #include <fstream>
 #include <cmath>
 #include <chrono>
-#include <thread>
+#include <conio.h>
+#include <atomic>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -63,6 +64,15 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 
 
 
+bool getInput(char* c)
+{
+    if (_kbhit())
+    {
+        *c = _getch();
+        return true; // Key Was Hit
+    }
+    return false; // No keys were pressed
+}
 
 bool SetAcquisitionMode(INodeMap& nodeMap)
 {
@@ -380,8 +390,8 @@ void DrawReperAxisAndCalculateAngle(Mat& contourImage, const RotatedRect& ellips
 
     // Déterminer quel demi-ellipse a les points de contour les plus proches du centre
 #ifdef VERBOSE
-    cout << "averageDistance_1  =  " << averageDistance_1 << endl;
-    cout << "averageDistance_2  =  " << averageDistance_2 << endl;
+    //cout << "averageDistance_1  =  " << averageDistance_1 << endl;
+    //cout << "averageDistance_2  =  " << averageDistance_2 << endl;
 #endif // VERBOSE
 
     if (averageDistance_1 < averageDistance_2) {
@@ -537,7 +547,7 @@ std::ofstream CreateCSVFile() {
     }
 
     // Écrivez les en-têtes de colonne
-    csvFile << "iteration, datetime, FrameRate,HeadingAngle\n";
+    csvFile << "iteration, datetime, FrameRate, HeadingAngle, Spacebar_pressed\n";
 
     return csvFile;
 }
@@ -560,6 +570,7 @@ int AcquireImages(CallbackFunction callback)
 	bool wings_detection = false;
     double frame_rate = 0;
     auto start = std::chrono::high_resolution_clock::now();
+    bool keyPressed = false;
 
     Struct_result struct_result;
 
@@ -837,9 +848,29 @@ int AcquireImages(CallbackFunction callback)
                         waitKey(0);
                     }
 #ifdef VERBOSE                 
-                    cout << "Fequence =  " << frame_rate << endl;
-                    cout << "Heading  =  " << headingAngle << endl;
+                    //cout << "Fequence =  " << frame_rate << endl;
+                    //cout << "Heading  =  " << headingAngle << endl;
+                    if (first_passage == 0) {
+                        cout << endl;
+                        cout << endl;
+                        cout << endl;
+                        cout << "Start acquisition..." << endl;
+                    }
 #endif // VERBOSE
+
+
+                    // ** KEYBOARD INPUT STEP ** //
+                    char key = ' ';
+                    if (getInput(&key)) {
+                        keyPressed = true;
+#ifdef VERBOSE
+                        cout << "Key has been pressed ! " << endl;
+#endif // VERBOSE
+                        if (key == 'q') {
+                            cout << "q has been pressed ! " << endl;
+                            return -1;
+                        }
+                    }
 
 
                     // ** SENDING DATA Through Callback to C# ** //
@@ -878,7 +909,7 @@ int AcquireImages(CallbackFunction callback)
                         oss << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S");
                         return oss.str();
                         }();
-                    csvFile << iteration << "," << timestamp << "," << frame_rate << "," << headingAngle << "\n";
+                    csvFile << iteration << "," << timestamp << "," << frame_rate << "," << headingAngle << "," << keyPressed << "\n";
 
                     // ** SAVING STEP ** //
                     if (SAVE_IMAGE == "TRUE") {
@@ -894,8 +925,9 @@ int AcquireImages(CallbackFunction callback)
                 pResultImage = nullptr;
                 first_passage = 1;
                 iteration++;
+                keyPressed = false;
 
-                cout << endl;
+                //cout << endl;
             }
             catch (Spinnaker::Exception& e)
             {

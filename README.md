@@ -18,8 +18,14 @@ To import correctly the project and libraries, follow instruction from the pdf T
 Here is the code :
 ## C_chill
 Code in C++, connect to camera, analyse image, displays image, save resutls as heading frame rate in csv file
+### Instruction 
+Press a key to mark a step
+Press q to stop program
 ## camera_acquisition
 Creation of a DLL from C++ C_chill, connect to camera, analyse image, displays image, save resutls as heading frame rate in csv file, send this results via callback
+### Instruction 
+Press a key to mark a step
+Press q to stop program
 ## Camera_unity_C_sharp
 Proposition of interface between DLL and C#
 ## Acquisitiond_v143
